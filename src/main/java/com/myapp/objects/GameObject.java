@@ -1,20 +1,25 @@
 package com.myapp.objects;
 
-import com.myapp.Position;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>Created by MontolioV on 26.11.18.
  */
 public class GameObject {
+    private static AtomicInteger objectCounter = new AtomicInteger();
+
+    private int id;
     private Position currentPosition;
     private int hitRadius;
     private int hitDamage;
     private int hp;
 
     public GameObject() {
+        this.id = objectCounter.getAndIncrement();
     }
 
     public GameObject(Position currentPosition, int hitRadius, int hitDamage, int hp) {
+        this();
         this.currentPosition = currentPosition;
         this.hitRadius = hitRadius;
         this.hitDamage = hitDamage;
@@ -34,6 +39,14 @@ public class GameObject {
 
     public void reduceHP(int hitDamage) {
         hp -= hitDamage;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public Position getCurrentPosition() {

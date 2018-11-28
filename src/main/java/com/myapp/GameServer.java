@@ -1,10 +1,13 @@
 package com.myapp;
 
-import com.myapp.objects.*;
+import com.myapp.objects.DynamicObject;
+import com.myapp.objects.GameObject;
+import com.myapp.objects.StaticObject;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import java.util.*;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,52 +17,52 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GameServer {
     private Jsonb jsonb = JsonbBuilder.create();
-    private Set<DynamicObject> dynamicObjects = ConcurrentHashMap.newKeySet();
-    private Set<StaticObject> staticObjects = ConcurrentHashMap.newKeySet();
+    private Map<Integer, DynamicObject> dynamicObjects = new ConcurrentHashMap<>();
+    private Map<Integer, StaticObject> staticObjects = new ConcurrentHashMap<>();
 
     public void gameCycle() {
-        dynamicObjects.parallelStream().forEach(DynamicObject::updatePosition);
-        dynamicObjects.parallelStream()
+        dynamicObjects.values().parallelStream().forEach(DynamicObject::updatePosition);
+        dynamicObjects.values().parallelStream()
                 .forEach(dynamicObject -> {
-                    dynamicObjects.parallelStream()
+                    dynamicObjects.values().parallelStream()
                             .filter(otherDynamicObject -> !otherDynamicObject.equals(dynamicObject))
                             .filter(dynamicObject::objectsCollideCheck)
                             .forEach(dynamicObjectOther -> {
                                 dynamicObjectOther.reduceHP(dynamicObject.getHitDamage());
                             });
-                    staticObjects.parallelStream()
+                    staticObjects.values().parallelStream()
                             .filter(dynamicObject::objectsCollideCheck)
                             .forEach(staticObject -> {
                                 staticObject.reduceHP(dynamicObject.getHitDamage());
                                 dynamicObject.reduceHP(staticObject.getHitDamage());
                             });
                 });
-        dynamicObjects.parallelStream().filter(dynamicObject -> dynamicObject.getHp() <= 0).forEach(dynamicObjects::remove);
-        staticObjects.parallelStream().filter(staticObject -> staticObject.getHp() <= 0).forEach(staticObjects::remove);
+        dynamicObjects.values().parallelStream().filter(dynamicObject -> dynamicObject.getHp() <= 0)
+                .mapToInt(GameObject::getId)
+                .forEach(dynamicObjects::remove);
+        staticObjects.values().parallelStream().filter(staticObject -> staticObject.getHp() <= 0)
+                .mapToInt(GameObject::getId)
+                .forEach(staticObjects::remove);
     }
 
     public String toJson() {
         StringJoiner sj = new StringJoiner(",", "[", "]");
 
-        dynamicObjects.forEach(dynamicObject -> sj.add(jsonb.toJson(dynamicObject)));
-        staticObjects.forEach(staticObject -> sj.add(jsonb.toJson(staticObject)));
+        dynamicObjects.values().forEach(dynamicObject -> sj.add(jsonb.toJson(dynamicObject)));
+        staticObjects.values().forEach(staticObject -> sj.add(jsonb.toJson(staticObject)));
         return sj.toString();
     }
 
-    public boolean add(DynamicObject dynamicObject) {
-        return dynamicObjects.add(dynamicObject);
+    public void add(DynamicObject dynamicObject) {
+        dynamicObjects.put(dynamicObject.getId(), dynamicObject);
     }
 
-    public boolean remove(DynamicObject dynamicObject) {
-        return dynamicObjects.remove(dynamicObject);
+    public void add(StaticObject staticObject) {
+        staticObjects.put(staticObject.getId(), staticObject);
     }
 
-    public boolean add(StaticObject staticObject) {
-        return this.staticObjects.add(staticObject);
+    public void remove(int id) {
+        dynamicObjects.remove(id);
+        staticObjects.remove(id);
     }
-
-    public boolean remove(StaticObject staticObject) {
-        return staticObjects.remove(staticObject);
-    }
-
 }

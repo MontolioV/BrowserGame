@@ -1,4 +1,6 @@
-package com.myapp;
+package com.myapp.network;
+
+import com.myapp.Engine;
 
 import javax.inject.Inject;
 import javax.websocket.*;
@@ -16,12 +18,13 @@ public class GameWebSocket {
     @OnOpen
     public void onOpen(Session session) throws IOException {
         System.out.println(session.getId() + " new client");
-        engine.enterGame(session);
+        int playersCharacterId = engine.enterGame(session);
+        session.getBasicRemote().sendText(String.valueOf(playersCharacterId));
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        System.out.println(session.getId() + " message: " + message);
+        engine.processClientInput(session, message);
     }
 
     @OnError
