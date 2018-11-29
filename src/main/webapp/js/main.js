@@ -5,9 +5,6 @@
     const ACTION_CANVAS = document.getElementById('actionLayer');
     const ACTION_CONTEXT = ACTION_CANVAS.getContext('2d');
     const CHARACTER_CANVAS = drawCharacter();
-    const CHARACTER_SPEED = 50;
-    let xPosition = 100;
-    let yPosition = 100;
     let xClick = 0;
     let yClick = 0;
     let selfId;
@@ -20,8 +17,16 @@
             for (const obj of JSON.parse(data)) {
                 array.push(new GameObject(obj))
             }
+
+            /*
+                        for (const oldObj of objArray) {
+                            let newObj = array.find(value => value.id === oldObj.id);
+                            console.log(`x ${oldObj.currentPosition.x - newObj.currentPosition.x}, y ${oldObj.currentPosition.y - newObj.currentPosition.y}`);
+                        }
+            */
+
             objArray = array;
-            console.log(objArray);
+            // console.log(objArray);
         } else {
             selfId = parseInt(message.data);
             console.log(selfId);
@@ -31,13 +36,17 @@
     ACTION_CANVAS.onclick = function (ev) {
         let clickPosition = getMousePos(ACTION_CANVAS, ev);
         SOCKET.send(JSON.stringify(clickPosition));
-        console.log(JSON.stringify(clickPosition));
+        // console.log(JSON.stringify(clickPosition));
 
         xClick = clickPosition.x;
         yClick = clickPosition.y;
     };
 
-    window.setInterval(gameCycle, 16);
+    window.setInterval(() => {
+        // console.time('gameCycle');
+        gameCycle();
+        // console.timeEnd('gameCycle');
+    }, 15);
 
     function gameCycle() {
         ACTION_CONTEXT.clearRect(0, 0, ACTION_CANVAS.width, ACTION_CANVAS.height);
@@ -45,8 +54,7 @@
         for (const obj of objArray) {
             ACTION_CONTEXT.drawImage(CHARACTER_CANVAS, obj.currentPosition.x, obj.currentPosition.y);
         }
-        smothMove();
-        // rotateXY();
+        smoothMove();
     }
 
     function drawCharacter() {
@@ -69,12 +77,26 @@
         };
     }
 
-    function smothMove() {
+    function smoothMove() {
         for (const obj of objArray) {
-            // obj.currentPosition.x += (xClick - obj.currentPosition.x) / obj.speed;
-            // obj.currentPosition.y += (yClick - obj.currentPosition.y) / obj.speed;
+            let remainingX;
+            let remainingY;
+            if (obj.id === selfId) {
+                remainingX = xClick - obj.currentPosition.x;
+                remainingY = yClick - obj.currentPosition.y;
+            } else {
+                remainingX = obj.destination.x - obj.currentPosition.x;
+                remainingY = obj.destination.y - obj.currentPosition.y;
+            }
+
+            if (remainingX === 0 && remainingY === 0) {
+                return;
+            }
+
+            let destinationDistance = Math.sqrt(Math.pow(remainingX, 2) + Math.pow(remainingY, 2));
+            let distanceCoefficient = obj.maxPossibleDistance / destinationDistance;
+            obj.currentPosition.x += remainingX * distanceCoefficient;
+            obj.currentPosition.y += remainingY * distanceCoefficient;
         }
-        // xPosition += (xClick - xPosition) / CHARACTER_SPEED;
-        // yPosition += (yClick - yPosition) / CHARACTER_SPEED;
     }
 })();

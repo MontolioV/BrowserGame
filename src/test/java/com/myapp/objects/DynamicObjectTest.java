@@ -10,8 +10,7 @@ import java.time.Clock;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * <p>Created by MontolioV on 28.11.18.
@@ -28,98 +27,123 @@ public class DynamicObjectTest {
 
     @Before
     public void setUp() throws Exception {
-        dynamicObject = new DynamicObject(positionMock, 0, 0, 0, 1, clockMock);
-        dynamicObject.setTrajectoryChangeTime(0L);
+        dynamicObject = new DynamicObject(positionMock, 0, 0, 0, 100, clockMock);
+        dynamicObject.setTimeOfLastMove(0L);
         dynamicObject.setDestination(destinationMock);
         when(positionMock.getX()).thenReturn(0);
         when(positionMock.getY()).thenReturn(0);
-        when(destinationMock.getX()).thenReturn(100);
-        when(destinationMock.getY()).thenReturn(100);
+        when(destinationMock.getX()).thenReturn(707);
+        when(destinationMock.getY()).thenReturn(707);   //Total 1000 path
         when(clockMock.millis()).thenReturn(1000L);
     }
 
     @Test
     public void updatePositionPositive() {
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(1, 1);
+        verify(positionMock).adjust(70, 70);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
 
-        when(clockMock.millis()).thenReturn(4999L);
+    }
+
+    @Test
+    public void updatePosition3Sec() {
+        when(clockMock.millis()).thenReturn(3000L);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(4, 4);
+        verify(positionMock).adjust(212, 212);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(3000L));
     }
 
     @Test
     public void updatePositionNegative() {
-        when(destinationMock.getX()).thenReturn(-100);
-        when(destinationMock.getY()).thenReturn(-100);
+        when(destinationMock.getX()).thenReturn(-707);
+        when(destinationMock.getY()).thenReturn(-707);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(-1, -1);
+        verify(positionMock).adjust(-70, -70);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
 
     @Test
-    public void updatePositionNegativeModifier() {
-        when(destinationMock.getX()).thenReturn(-100);
-        when(destinationMock.getY()).thenReturn(100);
+    public void updatePositionMix() {
+        when(destinationMock.getX()).thenReturn(-707);
+        when(destinationMock.getY()).thenReturn(707);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(-1, 1);
+        verify(positionMock).adjust(-70, 70);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
 
-        when(destinationMock.getX()).thenReturn(100);
-        when(destinationMock.getY()).thenReturn(-100);
+        dynamicObject.setTimeOfLastMove(0L);
+        when(destinationMock.getX()).thenReturn(707);
+        when(destinationMock.getY()).thenReturn(-707);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(1, -1);
+        verify(positionMock).adjust(70, -70);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
 
     @Test
     public void updatePositionZero() {
         when(destinationMock.getX()).thenReturn(0);
-        when(destinationMock.getY()).thenReturn(100);
-
-        dynamicObject.updatePosition();
-        verify(positionMock).adjust(0, 1);
-
-        when(destinationMock.getX()).thenReturn(100);
         when(destinationMock.getY()).thenReturn(0);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(1, 0);
+        verify(positionMock, never()).adjust(anyInt(), anyInt());
+        assertThat(dynamicObject.getTimeOfLastMove(), is(0L));
 
         when(destinationMock.getX()).thenReturn(0);
+        when(destinationMock.getY()).thenReturn(1000);
+
+        dynamicObject.updatePosition();
+        verify(positionMock).adjust(0, 100);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
+
+        dynamicObject.setTimeOfLastMove(0L);
+        when(destinationMock.getX()).thenReturn(1000);
         when(destinationMock.getY()).thenReturn(0);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(0, 0);
+        verify(positionMock).adjust(100, 0);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
 
     @Test
     public void updatePositionAsymmetric() {
-        dynamicObject.setSpeed(2);
         when(destinationMock.getX()).thenReturn(600);
         when(destinationMock.getY()).thenReturn(800);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(1, 2);
+        verify(positionMock).adjust(60, 80);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
 
     @Test
     public void updatePositionTooFast() {
-        dynamicObject.setSpeed(1000);
+        dynamicObject.setSpeed(10000);
+        when(positionMock.getX()).thenReturn(507);
+        when(positionMock.getY()).thenReturn(507);
 
         dynamicObject.updatePosition();
-        verify(positionMock).adjust(100, 100);
+        verify(positionMock).adjust(200, 200);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
+
+        dynamicObject.setTimeOfLastMove(0L);
+        when(positionMock.getX()).thenReturn(-1000);
+        when(positionMock.getY()).thenReturn(-1000);
+
+        dynamicObject.updatePosition();
+        verify(positionMock).adjust(1707, 1707);
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
 
     @Test
     public void changeDestination() {
-        dynamicObject.setTrajectoryChangeTime(1L);
+        dynamicObject.setTimeOfLastMove(1L);
         assertThat(dynamicObject.getDestination(), is(destinationMock));
 
         dynamicObject.changeDestination(positionMock);
 
         assertThat(dynamicObject.getDestination(), is(positionMock));
-        assertThat(dynamicObject.getTrajectoryChangeTime(), is(1000L));
+        assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
 }

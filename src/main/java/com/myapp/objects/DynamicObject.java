@@ -7,11 +7,12 @@ import java.time.Clock;
  * <p>Created by MontolioV on 26.11.18.
  */
 public class DynamicObject extends GameObject {
-    @JsonbTransient
-    private Clock clock;
     private Position destination;
     private double speed;
-    private long trajectoryChangeTime;
+    @JsonbTransient
+    private Clock clock;
+    @JsonbTransient
+    private long timeOfLastMove;
 
     public DynamicObject() {
     }
@@ -24,36 +25,28 @@ public class DynamicObject extends GameObject {
     }
 
     public void updatePosition() {
-        long time = clock.millis() - trajectoryChangeTime;
         Position selfPosition = getCurrentPosition();
         double remainingX = destination.getX() - selfPosition.getX();
         double remainingY = destination.getY() - selfPosition.getY();
-        int xModifier = 0;
-        int yModifier = 0;
-        if (remainingX != 0 && remainingY != 0) {
-            xModifier = signAndDestinationControl(remainingX,
-                    (speed / 1000) * Math.abs(remainingX / remainingY) * time);
-            yModifier = signAndDestinationControl(remainingY,
-                    (speed / 1000) * Math.abs(remainingY / remainingX) * time);
-        } else if (remainingX == 0 && remainingY != 0) {
-            yModifier = signAndDestinationControl(remainingY, (speed / 1000) * time);
-        } else if (remainingX != 0) {
-            xModifier = signAndDestinationControl(remainingX, (speed / 1000) * time);
+        if (remainingX == 0 && remainingY == 0) {
+            return;
         }
 
-        selfPosition.adjust(xModifier, yModifier);
-    }
-
-    private int signAndDestinationControl(double remaining, double modifier) {
-        if (Math.abs(remaining) > modifier) {
-            return (int) (modifier * Math.signum(remaining));
+        long time = clock.millis() - timeOfLastMove;
+        double maxPossibleDistance = (speed / 1000) * time;
+        double destinationDistance = Math.sqrt(Math.pow(remainingX, 2) + Math.pow(remainingY, 2));
+        if (destinationDistance <= maxPossibleDistance) {
+            selfPosition.adjust(destination.getX() - selfPosition.getX(), destination.getY() - selfPosition.getY());
         } else {
-            return (int) remaining;
+            double distanceCoefficient = maxPossibleDistance / destinationDistance;
+            selfPosition.adjust((int) (remainingX * distanceCoefficient), (int) (remainingY * distanceCoefficient));
         }
+
+        timeOfLastMove = clock.millis();
     }
 
     public void changeDestination(Position newDestination) {
-        trajectoryChangeTime = clock.millis();
+        timeOfLastMove = clock.millis();
         destination = newDestination;
     }
 
@@ -65,12 +58,12 @@ public class DynamicObject extends GameObject {
         this.speed = speed;
     }
 
-    public long getTrajectoryChangeTime() {
-        return trajectoryChangeTime;
+    public long getTimeOfLastMove() {
+        return timeOfLastMove;
     }
 
-    public void setTrajectoryChangeTime(long trajectoryChangeTime) {
-        this.trajectoryChangeTime = trajectoryChangeTime;
+    public void setTimeOfLastMove(long timeOfLastMove) {
+        this.timeOfLastMove = timeOfLastMove;
     }
 
     public Position getDestination() {
