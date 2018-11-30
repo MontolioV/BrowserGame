@@ -8,25 +8,25 @@
     let xClick = 0;
     let yClick = 0;
     let selfId;
-    let objArray = [];
+    let gameObjects = [];
 
     SOCKET.onmessage = function (message) {
         let data = message.data;
         if (isNaN(parseInt(data))) {
-            let array = [];
-            for (const obj of JSON.parse(data)) {
-                array.push(new GameObject(obj))
+            let tmpArray = [];
+            for (const objFromServer of JSON.parse(data)) {
+                let oldObject = gameObjects.find(value => value.id === objFromServer.id);
+                if (!oldObject) {
+                    tmpArray.push(new GameObject(objFromServer));
+                } else {
+                    oldObject.update(objFromServer);
+                    tmpArray.push(oldObject);
+                }
             }
 
-            /*
-                        for (const oldObj of objArray) {
-                            let newObj = array.find(value => value.id === oldObj.id);
-                            console.log(`x ${oldObj.currentPosition.x - newObj.currentPosition.x}, y ${oldObj.currentPosition.y - newObj.currentPosition.y}`);
-                        }
-            */
+            gameObjects = tmpArray;
 
-            objArray = array;
-            // console.log(objArray);
+            // console.log(JSON.stringify(gameObjects));
         } else {
             selfId = parseInt(message.data);
             console.log(selfId);
@@ -36,26 +36,30 @@
     ACTION_CANVAS.onclick = function (ev) {
         let clickPosition = getMousePos(ACTION_CANVAS, ev);
         SOCKET.send(JSON.stringify(clickPosition));
-        // console.log(JSON.stringify(clickPosition));
+        console.log(JSON.stringify(clickPosition));
 
         xClick = clickPosition.x;
         yClick = clickPosition.y;
     };
 
-    window.setInterval(() => {
-        // console.time('gameCycle');
-        gameCycle();
-        // console.timeEnd('gameCycle');
-    }, 15);
+    window.requestAnimationFrame(renderActionLayer);
 
-    function gameCycle() {
+    window.setInterval(() => {
+        // console.time('updatePositioning');
+        updatePositioning();
+        // console.timeEnd('updatePositioning');
+    }, 16);
+
+    function renderActionLayer() {
         ACTION_CONTEXT.clearRect(0, 0, ACTION_CANVAS.width, ACTION_CANVAS.height);
 
-        for (const obj of objArray) {
+        for (const obj of gameObjects) {
             ACTION_CONTEXT.drawImage(CHARACTER_CANVAS, obj.currentPosition.x, obj.currentPosition.y);
         }
-        smoothMove();
+
+        window.requestAnimationFrame(renderActionLayer);
     }
+
 
     function drawCharacter() {
         let result = document.createElement('canvas');
@@ -77,26 +81,40 @@
         };
     }
 
-    function smoothMove() {
-        for (const obj of objArray) {
-            let remainingX;
-            let remainingY;
+    function updatePositioning() {
+        for (const obj of gameObjects) {
+            let xOffset;
+            let yOffset;
             if (obj.id === selfId) {
-                remainingX = xClick - obj.currentPosition.x;
-                remainingY = yClick - obj.currentPosition.y;
+                xOffset = xClick - obj.currentPosition.x;
+                yOffset = yClick - obj.currentPosition.y;
             } else {
-                remainingX = obj.destination.x - obj.currentPosition.x;
-                remainingY = obj.destination.y - obj.currentPosition.y;
+                xOffset = obj.destination.x - obj.currentPosition.x;
+                yOffset = obj.destination.y - obj.currentPosition.y;
             }
 
-            if (remainingX === 0 && remainingY === 0) {
+            if (xOffset === 0 && yOffset === 0) {
                 return;
             }
 
-            let destinationDistance = Math.sqrt(Math.pow(remainingX, 2) + Math.pow(remainingY, 2));
-            let distanceCoefficient = obj.maxPossibleDistance / destinationDistance;
-            obj.currentPosition.x += remainingX * distanceCoefficient;
-            obj.currentPosition.y += remainingY * distanceCoefficient;
+
+            let destinationDistance = Math.sqrt(Math.pow(xOffset, 2) + Math.pow(yOffset, 2));
+            if (destinationDistance < obj.maxPossibleDistance) {
+                obj.currentPosition.x += xOffset;
+                obj.currentPosition.y += yOffset;
+            } else {
+                let distanceCoefficient = obj.maxPossibleDistance / destinationDistance;
+                obj.currentPosition.x += roundedOffset(xOffset, obj.errorFixOffset.x, distanceCoefficient);
+                obj.currentPosition.y += roundedOffset(yOffset, obj.errorFixOffset.y, distanceCoefficient);
+            }
         }
+    }
+
+    function roundedOffset(offset, errorFixOffset, coefficient) {
+        let result = (offset + errorFixOffset / 30) * coefficient;
+
+        //More efficient rendering, but less precise
+        // result = Math.round(result);
+        return result;
     }
 })();
