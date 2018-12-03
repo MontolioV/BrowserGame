@@ -25,5 +25,21 @@ class GameObject {
         this.destination = new Position(destination);
         this.errorFixOffset = this.currentPosition.calculateOffset(currentPosition);
     }
+
+    nullifyErrorFixOffset() {
+        this.errorFixOffset.x = 0;
+        this.errorFixOffset.y = 0;
+    }
+
+    errorFixOffsetNotNull() {
+        return this.errorFixOffset.x !== 0 && this.errorFixOffset.y !== 0;
+    }
+}
+
+class ResponseInit {
+    constructor({selfId, initPosition}) {
+        this.selfId = selfId;
+        this.initPosition = new Position(initPosition);
+    }
 }
 

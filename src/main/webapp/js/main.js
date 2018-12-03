@@ -12,9 +12,16 @@
 
     SOCKET.onmessage = function (message) {
         let data = message.data;
-        if (isNaN(parseInt(data))) {
+        let response = JSON.parse(data);
+        if (response.hasOwnProperty('type') && response.type === 'INIT') {
+            let responseInit = new ResponseInit(response);
+            selfId = responseInit.selfId;
+            console.log(selfId);
+            xClick = responseInit.initPosition.x;
+            yClick = responseInit.initPosition.y;
+        } else {
             let tmpArray = [];
-            for (const objFromServer of JSON.parse(data)) {
+            for (const objFromServer of response) {
                 let oldObject = gameObjects.find(value => value.id === objFromServer.id);
                 if (!oldObject) {
                     tmpArray.push(new GameObject(objFromServer));
@@ -25,11 +32,7 @@
             }
 
             gameObjects = tmpArray;
-
             // console.log(JSON.stringify(gameObjects));
-        } else {
-            selfId = parseInt(message.data);
-            console.log(selfId);
         }
     };
 
@@ -94,11 +97,21 @@
             }
 
             if (xOffset === 0 && yOffset === 0) {
-                return;
+                continue;
             }
 
-
             let destinationDistance = Math.sqrt(Math.pow(xOffset, 2) + Math.pow(yOffset, 2));
+
+            if (obj.errorFixOffsetNotNull()) {
+                let errorFixOffsetDistance = Math.sqrt(Math.pow(obj.errorFixOffset.x, 2) + Math.pow(obj.errorFixOffset.y, 2));
+                if (destinationDistance < errorFixOffsetDistance) {
+                    obj.currentPosition.x += obj.errorFixOffset.x;
+                    obj.currentPosition.y += obj.errorFixOffset.y;
+                    obj.nullifyErrorFixOffset();
+                    continue;
+                }
+            }
+
             if (destinationDistance < obj.maxPossibleDistance) {
                 obj.currentPosition.x += xOffset;
                 obj.currentPosition.y += yOffset;
@@ -111,10 +124,9 @@
     }
 
     function roundedOffset(offset, errorFixOffset, coefficient) {
-        let result = (offset + errorFixOffset / 30) * coefficient;
+        return (offset + errorFixOffset / 3) * coefficient;
 
         //More efficient rendering, but less precise
         // result = Math.round(result);
-        return result;
     }
 })();

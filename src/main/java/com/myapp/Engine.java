@@ -1,12 +1,13 @@
 package com.myapp;
 
+import com.myapp.network.ResponseInit;
+import com.myapp.network.ResponseType;
 import com.myapp.objects.PlayerCharacter;
 import com.myapp.objects.Position;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.websocket.Session;
 import java.time.Clock;
 import java.util.Map;
@@ -19,8 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Engine {
     @Inject
     private Clock clock;
-    private Jsonb jsonb = JsonbBuilder.create();
-    private GameServer gameServer = new GameServer();
+    @Inject
+    private Jsonb jsonb;
+    @Inject
+    private GameServer gameServer;
     private boolean engineRunning;
     private Map<Session, PlayerCharacter> sessionPCMap = new ConcurrentHashMap<>();
 
@@ -38,7 +41,7 @@ public class Engine {
         Thread gameCycleThread = new Thread(() -> {
             while (engineRunning) {
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(100);
                     gameServer.gameCycle();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -77,12 +80,14 @@ public class Engine {
         engineRunning = false;
     }
 
-    public int enterGame(Session session) {
+    public String enterGame(Session session) {
         Position position = new Position((int) (Math.random() * 500), (int) (Math.random() * 500));
         PlayerCharacter newPC = new PlayerCharacter(position, 10, 30, 100, 100, clock, "me");
         gameServer.add(newPC);
         sessionPCMap.put(session, newPC);
-        return newPC.getId();
+
+        ResponseInit responseInit = new ResponseInit(ResponseType.INIT, newPC.getId(), newPC.getCurrentPosition());
+        return jsonb.toJson(responseInit);
     }
 
     public void processClientInput(Session session, String input) {

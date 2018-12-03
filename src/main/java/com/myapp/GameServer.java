@@ -4,8 +4,9 @@ import com.myapp.objects.DynamicObject;
 import com.myapp.objects.GameObject;
 import com.myapp.objects.StaticObject;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,9 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Created by MontolioV on 26.11.18.
  */
 
-
+@Singleton
 public class GameServer {
-    private Jsonb jsonb = JsonbBuilder.create();
+    @Inject
+    private Jsonb jsonb;
     private Map<Integer, DynamicObject> dynamicObjects = new ConcurrentHashMap<>();
     private Map<Integer, StaticObject> staticObjects = new ConcurrentHashMap<>();
 
@@ -64,5 +66,17 @@ public class GameServer {
     public void remove(int id) {
         dynamicObjects.remove(id);
         staticObjects.remove(id);
+    }
+
+    public boolean containsObject(int id) {
+        return dynamicObjects.containsKey(id) || staticObjects.containsKey(id);
+    }
+
+    public Jsonb getJsonb() {
+        return jsonb;
+    }
+
+    public void setJsonb(Jsonb jsonb) {
+        this.jsonb = jsonb;
     }
 }

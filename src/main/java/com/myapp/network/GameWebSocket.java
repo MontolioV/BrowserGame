@@ -18,8 +18,8 @@ public class GameWebSocket {
     @OnOpen
     public void onOpen(Session session) throws IOException {
         System.out.println(session.getId() + " new client");
-        int playersCharacterId = engine.enterGame(session);
-        session.getBasicRemote().sendText(String.valueOf(playersCharacterId));
+        String response = engine.enterGame(session);
+        session.getBasicRemote().sendText(response);
     }
 
     @OnMessage
