@@ -7,12 +7,13 @@ import java.time.Clock;
  * <p>Created by MontolioV on 26.11.18.
  */
 public class DynamicObject extends GameObject {
-    private Position destination;
-    private double speed;
     @JsonbTransient
     private Clock clock;
     @JsonbTransient
     private long timeOfLastMove;
+    private Position destination;
+    private double speed;
+    private double directionAngle;
 
     public DynamicObject() {
     }
@@ -50,6 +51,15 @@ public class DynamicObject extends GameObject {
         destination = newDestination;
     }
 
+    public void updateDirectionAngle() {
+        Position currentPosition = getCurrentPosition();
+        if (currentPosition.distance(destination) > 0) {
+            int xDestinationFromZero = destination.getX() - currentPosition.getX();
+            int yDestinationFromZero = destination.getY() - currentPosition.getY();
+            directionAngle = Math.toDegrees(Math.atan2(yDestinationFromZero, xDestinationFromZero));
+        }
+    }
+
     public double getSpeed() {
         return speed;
     }
@@ -82,4 +92,11 @@ public class DynamicObject extends GameObject {
         this.clock = clock;
     }
 
+    public double getDirectionAngle() {
+        return directionAngle;
+    }
+
+    public void setDirectionAngle(double directionAngle) {
+        this.directionAngle = directionAngle;
+    }
 }

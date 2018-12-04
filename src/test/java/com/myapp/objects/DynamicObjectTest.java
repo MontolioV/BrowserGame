@@ -146,4 +146,53 @@ public class DynamicObjectTest {
         assertThat(dynamicObject.getDestination(), is(positionMock));
         assertThat(dynamicObject.getTimeOfLastMove(), is(1000L));
     }
+
+    @Test
+    public void updateDirectionAngle() {
+        when(positionMock.distance(destinationMock)).thenReturn(1D);
+        when(destinationMock.getX()).thenReturn(-1);
+        when(destinationMock.getY()).thenReturn(0);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(180D));
+
+        when(destinationMock.getX()).thenReturn(0);
+        when(destinationMock.getY()).thenReturn(1);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(90D));
+
+        when(destinationMock.getX()).thenReturn(1);
+        when(destinationMock.getY()).thenReturn(0);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(0D));
+
+        when(destinationMock.getX()).thenReturn(0);
+        when(destinationMock.getY()).thenReturn(-1);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(-90D));
+
+        when(positionMock.getX()).thenReturn(1);
+        when(positionMock.getY()).thenReturn(1);
+        when(destinationMock.getX()).thenReturn(1);
+        when(destinationMock.getY()).thenReturn(0);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(-90D));
+
+        when(positionMock.getX()).thenReturn(-1);
+        when(positionMock.getY()).thenReturn(-1);
+        when(destinationMock.getX()).thenReturn(1);
+        when(destinationMock.getY()).thenReturn(1);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(45D));
+
+        when(positionMock.distance(destinationMock)).thenReturn(0D);
+
+        dynamicObject.updateDirectionAngle();
+        assertThat(dynamicObject.getDirectionAngle(), is(45D));
+    }
 }

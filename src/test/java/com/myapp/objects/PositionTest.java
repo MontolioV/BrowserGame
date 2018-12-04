@@ -34,6 +34,19 @@ public class PositionTest {
     }
 
     @Test
+    public void distance() {
+        double distance = position.distance(positionSame);
+        assertThat(distance, is(0D));
+
+        Position positionDistance5 = new Position(4, 5);
+        distance = position.distance(positionDistance5);
+        assertThat(distance, is(5D));
+
+        distance = positionDistance5.distance(position);
+        assertThat(distance, is(5D));
+    }
+
+    @Test
     public void equals() {
         assertThat(position, is(positionSame));
         assertThat(position, not(positionX));

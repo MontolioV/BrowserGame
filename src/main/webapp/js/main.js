@@ -5,9 +5,8 @@
     const ACTION_CANVAS = document.getElementById('actionLayer');
     const ACTION_CONTEXT = ACTION_CANVAS.getContext('2d');
     const CHARACTER_CANVAS = drawCharacter();
-    let xClick = 0;
-    let yClick = 0;
     let selfId;
+    let selfObject;
     let gameObjects = [];
 
     SOCKET.onmessage = function (message) {
@@ -17,8 +16,6 @@
             let responseInit = new ResponseInit(response);
             selfId = responseInit.selfId;
             console.log(selfId);
-            xClick = responseInit.initPosition.x;
-            yClick = responseInit.initPosition.y;
         } else {
             let tmpArray = [];
             for (const objFromServer of response) {
@@ -29,9 +26,14 @@
                     oldObject.update(objFromServer);
                     tmpArray.push(oldObject);
                 }
+
             }
 
             gameObjects = tmpArray;
+
+            if (!selfObject) {
+                selfObject = gameObjects.find(value => value.id === selfId);
+            }
             // console.log(JSON.stringify(gameObjects));
         }
     };
@@ -41,8 +43,9 @@
         SOCKET.send(JSON.stringify(clickPosition));
         console.log(JSON.stringify(clickPosition));
 
-        xClick = clickPosition.x;
-        yClick = clickPosition.y;
+        selfObject.destination.x = clickPosition.x;
+        selfObject.destination.y = clickPosition.y;
+        selfObject.calculateRotation();
     };
 
     window.requestAnimationFrame(renderActionLayer);
@@ -57,7 +60,11 @@
         ACTION_CONTEXT.clearRect(0, 0, ACTION_CANVAS.width, ACTION_CANVAS.height);
 
         for (const obj of gameObjects) {
-            ACTION_CONTEXT.drawImage(CHARACTER_CANVAS, obj.currentPosition.x, obj.currentPosition.y);
+            ACTION_CONTEXT.save();
+            ACTION_CONTEXT.translate(obj.currentPosition.x, obj.currentPosition.y);
+            ACTION_CONTEXT.rotate(obj.rotationAngleRadians);
+            ACTION_CONTEXT.drawImage(CHARACTER_CANVAS, -10, -10);
+            ACTION_CONTEXT.restore();
         }
 
         window.requestAnimationFrame(renderActionLayer);
@@ -70,8 +77,15 @@
         result.height = 20;
         let context = result.getContext('2d');
         context.beginPath();
-        context.arc(10, 10, 10, 0, 2 * Math.PI);
+        // context.arc(10, 10, 10, 0, 2 * Math.PI);
+        context.moveTo(0, 0);
+        context.lineTo(20, 10);
+        context.lineTo(0, 20);
+        context.lineTo(5, 10);
+        context.lineTo(0, 0);
+        context.strokeStyle = 'black';
         context.fillStyle = 'green';
+        context.stroke();
         context.fill();
         return result;
     }
@@ -86,15 +100,8 @@
 
     function updatePositioning() {
         for (const obj of gameObjects) {
-            let xOffset;
-            let yOffset;
-            if (obj.id === selfId) {
-                xOffset = xClick - obj.currentPosition.x;
-                yOffset = yClick - obj.currentPosition.y;
-            } else {
-                xOffset = obj.destination.x - obj.currentPosition.x;
-                yOffset = obj.destination.y - obj.currentPosition.y;
-            }
+            let xOffset = obj.destination.x - obj.currentPosition.x;
+            let yOffset = obj.destination.y - obj.currentPosition.y;
 
             if (xOffset === 0 && yOffset === 0) {
                 continue;

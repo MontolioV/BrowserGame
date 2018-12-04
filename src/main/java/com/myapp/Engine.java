@@ -86,7 +86,7 @@ public class Engine {
         gameServer.add(newPC);
         sessionPCMap.put(session, newPC);
 
-        ResponseInit responseInit = new ResponseInit(ResponseType.INIT, newPC.getId(), newPC.getCurrentPosition());
+        ResponseInit responseInit = new ResponseInit(ResponseType.INIT, newPC.getId());
         return jsonb.toJson(responseInit);
     }
 
