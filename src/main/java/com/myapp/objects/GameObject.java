@@ -1,5 +1,7 @@
 package com.myapp.objects;
 
+import com.myapp.geometry.Position;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

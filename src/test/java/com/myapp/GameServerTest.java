@@ -1,5 +1,7 @@
 package com.myapp;
 
+import com.myapp.geometry.Position;
+import com.myapp.geometry.Rectangle;
 import com.myapp.objects.DynamicObject;
 import com.myapp.objects.StaticObject;
 import org.junit.Before;
@@ -33,30 +35,39 @@ public class GameServerTest {
     private DynamicObject do2Mock;
     @Mock
     private StaticObject soMock;
+    @Mock
+    private Position positionMock;
+    @Mock
+    private Rectangle levelAreaMock;
 
     @Before
     public void setUp() throws Exception {
         when(do1Mock.getId()).thenReturn(0);
         when(do1Mock.getHitDamage()).thenReturn(1);
         when(do1Mock.getHp()).thenReturn(0);
-        when(do1Mock.objectsCollideCheck(do2Mock)).thenReturn(true);
-        when(do1Mock.objectsCollideCheck(soMock)).thenReturn(true);
 
         when(do2Mock.getId()).thenReturn(1);
         when(do2Mock.getHitDamage()).thenReturn(2);
         when(do2Mock.getHp()).thenReturn(1);
-        when(do2Mock.objectsCollideCheck(do1Mock)).thenReturn(true);
-        when(do2Mock.objectsCollideCheck(soMock)).thenReturn(false);
 
         when(soMock.getId()).thenReturn(2);
         when(soMock.getHp()).thenReturn(0);
         when(soMock.getHitDamage()).thenReturn(3);
-        when(soMock.objectsCollideCheck(do1Mock)).thenReturn(true);
-        when(soMock.objectsCollideCheck(do2Mock)).thenReturn(false);
+
+        when(do1Mock.getCurrentPosition()).thenReturn(positionMock);
+        when(do2Mock.getCurrentPosition()).thenReturn(positionMock);
+        when(levelAreaMock.pointBelongsToArea(positionMock)).thenReturn(true);
     }
 
     @Test
-    public void gameCycle() {
+    public void gameCycleCollisions() {
+        when(do1Mock.objectsCollideCheck(do2Mock)).thenReturn(true);
+        when(do1Mock.objectsCollideCheck(soMock)).thenReturn(true);
+        when(do2Mock.objectsCollideCheck(do1Mock)).thenReturn(true);
+        when(do2Mock.objectsCollideCheck(soMock)).thenReturn(false);
+        when(soMock.objectsCollideCheck(do1Mock)).thenReturn(true);
+        when(soMock.objectsCollideCheck(do2Mock)).thenReturn(false);
+
         gameServer.add(do1Mock);
         gameServer.add(do2Mock);
         gameServer.add(soMock);
@@ -74,6 +85,19 @@ public class GameServerTest {
         verify(do2Mock, never()).reduceHP(3);
         verify(soMock).reduceHP(1);
         verify(soMock, never()).reduceHP(2);
+    }
+
+    @Test
+    public void gameCycleLeavingLevel() {
+        gameServer.add(do2Mock);
+        gameServer.gameCycle();
+        verify(do2Mock, never()).setHp(anyInt());
+
+        when(levelAreaMock.pointBelongsToArea(positionMock)).thenReturn(false);
+
+        gameServer.gameCycle();
+        verify(do2Mock).setHp(0);
+        verify(do2Mock, never()).reduceHP(anyInt());
     }
 
     @Test

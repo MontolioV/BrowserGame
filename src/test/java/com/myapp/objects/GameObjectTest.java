@@ -1,5 +1,6 @@
 package com.myapp.objects;
 
+import com.myapp.geometry.Position;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,9 +41,9 @@ public class GameObjectTest {
 
     @Test
     public void idAutoAssignment() {
-        assertThat(gameObject1.getId(), is(0));
-        assertThat(gameObject2.getId(), is(1));
-        assertThat(new GameObject().getId(), is(2));
+        int currentID = gameObject2.getId();
+        assertThat(new GameObject().getId(), is(currentID + 1));
+        assertThat(new GameObject().getId(), is(currentID + 2));
     }
 
     @Test

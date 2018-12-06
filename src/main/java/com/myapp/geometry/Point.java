@@ -1,29 +1,24 @@
-package com.myapp.objects;
+package com.myapp.geometry;
 
 import java.util.Objects;
 
 /**
- * <p>Created by MontolioV on 26.11.18.
+ * <p>Created by MontolioV on 05.12.18.
  */
-public class Position {
+public class Point {
     private int x;
     private int y;
 
-    public Position() {
+    public Point() {
     }
 
-    public Position(int x, int y) {
+    public Point(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public void adjust(int xModifier, int yModifier) {
-        this.x += xModifier;
-        this.y += yModifier;
-    }
-
-    public double distance(Position position) {
-        return Math.sqrt(Math.pow(position.x - this.x, 2) + Math.pow(position.y - this.y, 2));
+    public double distance(Point point) {
+        return Math.sqrt(Math.pow(point.x - this.x, 2) + Math.pow(point.y - this.y, 2));
     }
 
     public int getX() {
@@ -45,10 +40,10 @@ public class Position {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Position)) return false;
-        Position position = (Position) o;
-        return x == position.x &&
-                y == position.y;
+        if (!(o instanceof Point)) return false;
+        Point point = (Point) o;
+        return x == point.x &&
+                y == point.y;
     }
 
     @Override
@@ -58,7 +53,7 @@ public class Position {
 
     @Override
     public String toString() {
-        return "Position{" +
+        return "Point{" +
                 "x=" + x +
                 ", y=" + y +
                 '}';

@@ -1,12 +1,14 @@
 package com.myapp;
 
-import com.myapp.objects.DynamicObject;
-import com.myapp.objects.GameObject;
-import com.myapp.objects.StaticObject;
+import com.myapp.geometry.Point;
+import com.myapp.geometry.Position;
+import com.myapp.geometry.Rectangle;
+import com.myapp.objects.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.bind.Jsonb;
+import java.time.Clock;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,23 +23,14 @@ public class GameServer {
     private Jsonb jsonb;
     private Map<Integer, DynamicObject> dynamicObjects = new ConcurrentHashMap<>();
     private Map<Integer, StaticObject> staticObjects = new ConcurrentHashMap<>();
+    private Rectangle levelArea = new Rectangle(new Point(10, 10), new Point(490, 490));
 
     public void gameCycle() {
         dynamicObjects.values().parallelStream().forEach(DynamicObject::updatePosition);
         dynamicObjects.values().parallelStream()
                 .forEach(dynamicObject -> {
-                    dynamicObjects.values().parallelStream()
-                            .filter(otherDynamicObject -> !otherDynamicObject.equals(dynamicObject))
-                            .filter(dynamicObject::objectsCollideCheck)
-                            .forEach(dynamicObjectOther -> {
-                                dynamicObjectOther.reduceHP(dynamicObject.getHitDamage());
-                            });
-                    staticObjects.values().parallelStream()
-                            .filter(dynamicObject::objectsCollideCheck)
-                            .forEach(staticObject -> {
-                                staticObject.reduceHP(dynamicObject.getHitDamage());
-                                dynamicObject.reduceHP(staticObject.getHitDamage());
-                            });
+                    processCollisions(dynamicObject);
+                    processLeavingLevel(dynamicObject);
                 });
         dynamicObjects.values().parallelStream().filter(dynamicObject -> dynamicObject.getHp() <= 0)
                 .mapToInt(GameObject::getId)
@@ -47,12 +40,41 @@ public class GameServer {
                 .forEach(staticObjects::remove);
     }
 
+    private void processCollisions(DynamicObject dynamicObject) {
+        dynamicObjects.values().parallelStream()
+                .filter(otherDynamicObject -> !otherDynamicObject.equals(dynamicObject))
+                .filter(dynamicObject::objectsCollideCheck)
+                .forEach(dynamicObjectOther -> {
+                    dynamicObjectOther.reduceHP(dynamicObject.getHitDamage());
+                });
+        staticObjects.values().parallelStream()
+                .filter(dynamicObject::objectsCollideCheck)
+                .forEach(staticObject -> {
+                    staticObject.reduceHP(dynamicObject.getHitDamage());
+                    dynamicObject.reduceHP(staticObject.getHitDamage());
+                });
+    }
+
+    private void processLeavingLevel(DynamicObject dynamicObject) {
+        if (!levelArea.pointBelongsToArea(dynamicObject.getCurrentPosition())) {
+            dynamicObject.setHp(0);
+        }
+    }
+
     public String toJson() {
         StringJoiner sj = new StringJoiner(",", "[", "]");
 
         dynamicObjects.values().forEach(dynamicObject -> sj.add(jsonb.toJson(dynamicObject)));
         staticObjects.values().forEach(staticObject -> sj.add(jsonb.toJson(staticObject)));
         return sj.toString();
+    }
+
+    public PlayerCharacter addPC(Clock clock) {
+        Weapon weapon = new Weapon(levelArea.getDiagonal());
+        Position position = new Position((int) (Math.random() * 500), (int) (Math.random() * 500));
+        PlayerCharacter newPC = new PlayerCharacter(position, 10, 30, 100, 100, clock, "", weapon);
+        add(newPC);
+        return newPC;
     }
 
     public void add(DynamicObject dynamicObject) {
@@ -78,5 +100,13 @@ public class GameServer {
 
     public void setJsonb(Jsonb jsonb) {
         this.jsonb = jsonb;
+    }
+
+    public Rectangle getLevelArea() {
+        return levelArea;
+    }
+
+    public void setLevelArea(Rectangle levelArea) {
+        this.levelArea = levelArea;
     }
 }

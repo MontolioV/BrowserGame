@@ -1,9 +1,9 @@
 package com.myapp;
 
+import com.myapp.geometry.Position;
 import com.myapp.network.ResponseInit;
 import com.myapp.network.ResponseType;
 import com.myapp.objects.PlayerCharacter;
-import com.myapp.objects.Position;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -81,9 +81,7 @@ public class Engine {
     }
 
     public String enterGame(Session session) {
-        Position position = new Position((int) (Math.random() * 500), (int) (Math.random() * 500));
-        PlayerCharacter newPC = new PlayerCharacter(position, 10, 30, 100, 100, clock, "me");
-        gameServer.add(newPC);
+        PlayerCharacter newPC = gameServer.addPC(clock);
         sessionPCMap.put(session, newPC);
 
         ResponseInit responseInit = new ResponseInit(ResponseType.INIT, newPC.getId());

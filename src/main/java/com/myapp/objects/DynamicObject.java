@@ -1,5 +1,7 @@
 package com.myapp.objects;
 
+import com.myapp.geometry.Position;
+
 import javax.json.bind.annotation.JsonbTransient;
 import java.time.Clock;
 

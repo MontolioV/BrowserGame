@@ -1,5 +1,6 @@
 package com.myapp.objects;
 
+import com.myapp.geometry.Position;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
