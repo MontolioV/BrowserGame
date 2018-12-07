@@ -1,6 +1,6 @@
 package com.myapp.network;
 
-import com.myapp.Engine;
+import com.myapp.core.Engine;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -26,6 +26,8 @@ public class GameEngineSwitchServlet extends HttpServlet {
             engine.startEngine();
         }
     }
+
+    //Getter & Setters
 
     public Engine getEngine() {
         return engine;

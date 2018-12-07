@@ -1,4 +1,4 @@
-package com.myapp.network;
+package com.myapp.network.messages;
 
 /**
  * <p>Created by MontolioV on 03.12.18.

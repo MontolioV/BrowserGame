@@ -28,7 +28,7 @@ public class DynamicObjectTest {
 
     @Before
     public void setUp() throws Exception {
-        dynamicObject = new DynamicObject(positionMock, 0, 0, 0, 100, clockMock);
+        dynamicObject = new DynamicObjectTestImpl(positionMock, positionMock, 0, 0, 0, 100, clockMock);
         dynamicObject.setTimeOfLastMove(0L);
         dynamicObject.setDestination(destinationMock);
         when(positionMock.getX()).thenReturn(0);
@@ -195,5 +195,14 @@ public class DynamicObjectTest {
 
         dynamicObject.updateDirectionAngle();
         assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(45)));
+    }
+
+    private class DynamicObjectTestImpl extends DynamicObject {
+        public DynamicObjectTestImpl() {
+        }
+
+        public DynamicObjectTestImpl(Position current, Position destination, int hitRadius, int hitDamage, int hp, double speed, Clock clock) {
+            super(current, destination, hitRadius, hitDamage, hp, speed, clock);
+        }
     }
 }

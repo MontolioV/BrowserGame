@@ -1,8 +1,9 @@
-package com.myapp;
+package com.myapp.core;
 
 import com.myapp.geometry.Position;
-import com.myapp.network.ResponseInit;
-import com.myapp.network.ResponseType;
+import com.myapp.network.messages.Request;
+import com.myapp.network.messages.ResponseInit;
+import com.myapp.network.messages.ResponseType;
 import com.myapp.objects.PlayerCharacter;
 
 import javax.inject.Inject;
@@ -81,7 +82,7 @@ public class Engine {
     }
 
     public String enterGame(Session session) {
-        PlayerCharacter newPC = gameServer.addPC(clock);
+        PlayerCharacter newPC = gameServer.addPC("some name");
         sessionPCMap.put(session, newPC);
 
         ResponseInit responseInit = new ResponseInit(ResponseType.INIT, newPC.getId());
@@ -89,10 +90,23 @@ public class Engine {
     }
 
     public void processClientInput(Session session, String input) {
-        Position newDestination = jsonb.fromJson(input, Position.class);
         PlayerCharacter pc = sessionPCMap.get(session);
-        pc.changeDestination(newDestination);
+        Request request = jsonb.fromJson(input, Request.class);
+        switch (request.getType()) {
+
+            case MOVE:
+                Position newDestination = jsonb.fromJson(request.getContent(), Position.class);
+                pc.changeDestination(newDestination);
+                break;
+            case FIRE:
+                // TODO: 07.12.18 Game cycle must not be run while PC is firing, otherwise PC can kill himself 
+                pc.fire().forEach(gameServer::add);
+                break;
+        }
+
     }
+
+    //Getter & Setters
 
     public boolean isEngineRunning() {
         return engineRunning;

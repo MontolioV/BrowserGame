@@ -34,18 +34,28 @@
             if (!selfObject) {
                 selfObject = gameObjects.find(value => value.id === selfId);
             }
-            // console.log(JSON.stringify(gameObjects));
+            console.log(JSON.stringify(gameObjects));
         }
     };
 
     ACTION_CANVAS.onclick = function (ev) {
         let clickPosition = getMousePos(ACTION_CANVAS, ev);
-        SOCKET.send(JSON.stringify(clickPosition));
+        let response = new ClientRequest({type: 'MOVE', content: JSON.stringify(clickPosition)});
+        SOCKET.send(JSON.stringify(response));
+
         console.log(JSON.stringify(clickPosition));
 
         selfObject.destination.x = clickPosition.x;
         selfObject.destination.y = clickPosition.y;
         selfObject.calculateRotation();
+    };
+    document.onkeypress = function (ev) {
+        switch (ev.key) {
+            case 'f':
+                SOCKET.send(JSON.stringify(new ClientRequest({type: 'FIRE'})));
+                console.log(JSON.stringify(new ClientRequest({type: 'FIRE'})));
+                break;
+        }
     };
 
     window.requestAnimationFrame(renderActionLayer);
@@ -92,10 +102,10 @@
 
     function getMousePos(canvas, evt) {
         let rect = canvas.getBoundingClientRect();
-        return {
+        return new Position({
             x: evt.clientX - rect.left,
             y: evt.clientY - rect.top
-        };
+        });
     }
 
     function updatePositioning() {

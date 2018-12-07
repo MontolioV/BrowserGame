@@ -15,16 +15,17 @@ public class PlayerCharacter extends DynamicObject {
     public PlayerCharacter() {
     }
 
-    public PlayerCharacter(Position position, int hitRadius, int hitDamage, int hp, double speed, Clock clock, String playerName, Weapon weapon) {
-        super(position, hitRadius, hitDamage, hp, speed, clock);
+    public PlayerCharacter(Position current, Position destination, int hitRadius, int hitDamage, int hp, double speed, Clock clock, String playerName, Weapon weapon) {
+        super(current, destination, hitRadius, hitDamage, hp, speed, clock);
         this.playerName = playerName;
         this.weapon = weapon;
     }
 
-
     public Collection<Projectile> fire() {
         return weapon.fire(this);
     }
+
+    //Getter & Setters
 
     public String getPlayerName() {
         return playerName;

@@ -19,6 +19,8 @@ public class Rectangle extends Area {
         return p.getX() >= start.getX() && p.getY() >= start.getY() && p.getX() <= end.getX() && p.getY() <= end.getY();
     }
 
+    //Getter & Setters
+
     public double getDiagonal() {
         return diagonal;
     }

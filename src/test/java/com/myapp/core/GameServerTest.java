@@ -1,9 +1,8 @@
-package com.myapp;
+package com.myapp.core;
 
 import com.myapp.geometry.Position;
 import com.myapp.geometry.Rectangle;
-import com.myapp.objects.DynamicObject;
-import com.myapp.objects.StaticObject;
+import com.myapp.objects.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +29,8 @@ public class GameServerTest {
     @Mock
     private Jsonb jsonbMock;
     @Mock
+    private GameObjectFactory goFactoryMock;
+    @Mock
     private DynamicObject do1Mock;
     @Mock
     private DynamicObject do2Mock;
@@ -39,6 +40,8 @@ public class GameServerTest {
     private Position positionMock;
     @Mock
     private Rectangle levelAreaMock;
+    @Mock
+    private PlayerCharacter pcMock;
 
     @Before
     public void setUp() throws Exception {
@@ -60,7 +63,7 @@ public class GameServerTest {
     }
 
     @Test
-    public void gameCycleCollisions() {
+    public void gameCycle() {
         when(do1Mock.objectsCollideCheck(do2Mock)).thenReturn(true);
         when(do1Mock.objectsCollideCheck(soMock)).thenReturn(true);
         when(do2Mock.objectsCollideCheck(do1Mock)).thenReturn(true);
@@ -85,6 +88,9 @@ public class GameServerTest {
         verify(do2Mock, never()).reduceHP(3);
         verify(soMock).reduceHP(1);
         verify(soMock, never()).reduceHP(2);
+
+        verify(do1Mock).updateDirectionAngle();
+        verify(do2Mock).updateDirectionAngle();
     }
 
     @Test
@@ -108,5 +114,14 @@ public class GameServerTest {
 
         String json = gameServer.toJson();
         assertThat(json, is("[{obj},{obj}]"));
+    }
+
+    @Test
+    public void addPC() {
+        when(goFactoryMock.createPCCommon(anyString(), any(Position.class), any(Position.class), any(Weapon.class))).thenReturn(pcMock);
+        PlayerCharacter pc = gameServer.addPC("");
+        assertThat(pc, is(pcMock));
+        assertThat(gameServer.getDynamicObjects().size(), is(1));
+        gameServer.getDynamicObjects().values().forEach(dynamicObject -> assertThat(dynamicObject, is(pcMock)));
     }
 }

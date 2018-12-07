@@ -8,7 +8,7 @@ import java.time.Clock;
 /**
  * <p>Created by MontolioV on 26.11.18.
  */
-public class DynamicObject extends GameObject {
+public abstract class DynamicObject extends GameObject {
     @JsonbTransient
     private Clock clock;
     @JsonbTransient
@@ -18,13 +18,6 @@ public class DynamicObject extends GameObject {
     private double directionAngle;
 
     public DynamicObject() {
-    }
-
-    public DynamicObject(Position positionNoMovement, int hitRadius, int hitDamage, int hp, double speed, Clock clock) {
-        super(positionNoMovement, hitRadius, hitDamage, hp);
-        destination = positionNoMovement;
-        this.speed = speed;
-        this.clock = clock;
     }
 
     public DynamicObject(Position current, Position destination, int hitRadius, int hitDamage, int hp, double speed, Clock clock) {
@@ -68,6 +61,8 @@ public class DynamicObject extends GameObject {
             directionAngle = Math.atan2(yDestinationFromZero, xDestinationFromZero);
         }
     }
+
+    //Getter & Setters
 
     public double getSpeed() {
         return speed;

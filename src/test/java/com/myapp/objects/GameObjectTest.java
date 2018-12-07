@@ -16,8 +16,8 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GameObjectTest {
-    private GameObject gameObject1 = new GameObject();
-    private GameObject gameObject2 = new GameObject();
+    private GameObject gameObject1 = new GameObjectTestImpl();
+    private GameObject gameObject2 = new GameObjectTestImpl();
     @Mock
     private Position position1;
     @Mock
@@ -42,8 +42,8 @@ public class GameObjectTest {
     @Test
     public void idAutoAssignment() {
         int currentID = gameObject2.getId();
-        assertThat(new GameObject().getId(), is(currentID + 1));
-        assertThat(new GameObject().getId(), is(currentID + 2));
+        assertThat(new GameObjectTestImpl().getId(), is(currentID + 1));
+        assertThat(new GameObjectTestImpl().getId(), is(currentID + 2));
     }
 
     @Test
@@ -63,5 +63,8 @@ public class GameObjectTest {
     public void reduceHP() {
         gameObject1.reduceHP(10);
         assertThat(gameObject1.getHp(), is(90));
+    }
+
+    private class GameObjectTestImpl extends GameObject {
     }
 }

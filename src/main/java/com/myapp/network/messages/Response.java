@@ -1,4 +1,4 @@
-package com.myapp.network;
+package com.myapp.network.messages;
 
 /**
  * <p>Created by MontolioV on 03.12.18.
@@ -12,6 +12,8 @@ public class Response {
     public Response(ResponseType type) {
         this.type = type;
     }
+
+    //Getter & Setters
 
     public ResponseType getType() {
         return type;

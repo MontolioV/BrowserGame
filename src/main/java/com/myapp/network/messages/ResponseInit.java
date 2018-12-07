@@ -1,4 +1,4 @@
-package com.myapp.network;
+package com.myapp.network.messages;
 
 /**
  * <p>Created by MontolioV on 03.12.18.
@@ -13,6 +13,8 @@ public class ResponseInit extends Response {
         super(type);
         this.selfId = selfId;
     }
+
+    //Getter & Setters
 
     public int getSelfId() {
         return selfId;

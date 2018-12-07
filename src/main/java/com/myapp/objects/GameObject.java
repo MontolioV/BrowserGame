@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * <p>Created by MontolioV on 26.11.18.
  */
-public class GameObject {
+public abstract class GameObject {
     private static AtomicInteger objectCounter = new AtomicInteger();
 
     private int id;
@@ -36,12 +36,15 @@ public class GameObject {
         int distance = (int) Math.abs(Math.sqrt(xDiff + yDiff));
         distance -= this.getHitRadius();
         distance -= anotherGameObject.getHitRadius();
+
         return distance <= 0;
     }
 
     public void reduceHP(int hitDamage) {
         hp -= hitDamage;
     }
+
+    //Getter & Setters
 
     public int getId() {
         return id;

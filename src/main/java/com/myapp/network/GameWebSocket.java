@@ -1,6 +1,6 @@
 package com.myapp.network;
 
-import com.myapp.Engine;
+import com.myapp.core.Engine;
 
 import javax.inject.Inject;
 import javax.websocket.*;
@@ -34,6 +34,8 @@ public class GameWebSocket {
     @OnClose
     public void onClose(Session session) {
     }
+
+    //Getter & Setters
 
     public Engine getEngine() {
         return engine;

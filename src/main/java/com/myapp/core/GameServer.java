@@ -1,4 +1,4 @@
-package com.myapp;
+package com.myapp.core;
 
 import com.myapp.geometry.Point;
 import com.myapp.geometry.Position;
@@ -8,7 +8,6 @@ import com.myapp.objects.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.bind.Jsonb;
-import java.time.Clock;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,13 +19,18 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class GameServer {
     @Inject
+    private GameObjectFactory gameObjectFactory;
+    @Inject
     private Jsonb jsonb;
     private Map<Integer, DynamicObject> dynamicObjects = new ConcurrentHashMap<>();
     private Map<Integer, StaticObject> staticObjects = new ConcurrentHashMap<>();
-    private Rectangle levelArea = new Rectangle(new Point(10, 10), new Point(490, 490));
+    private Rectangle levelArea = new Rectangle(new Point(0, 0), new Point(500, 500));
 
     public void gameCycle() {
-        dynamicObjects.values().parallelStream().forEach(DynamicObject::updatePosition);
+        dynamicObjects.values().parallelStream().forEach(dynamicObject -> {
+            dynamicObject.updatePosition();
+            dynamicObject.updateDirectionAngle();
+        });
         dynamicObjects.values().parallelStream()
                 .forEach(dynamicObject -> {
                     processCollisions(dynamicObject);
@@ -69,10 +73,10 @@ public class GameServer {
         return sj.toString();
     }
 
-    public PlayerCharacter addPC(Clock clock) {
-        Weapon weapon = new Weapon(levelArea.getDiagonal());
+    public PlayerCharacter addPC(String name) {
+        Weapon weapon = new Weapon(gameObjectFactory, levelArea.getDiagonal());
         Position position = new Position((int) (Math.random() * 500), (int) (Math.random() * 500));
-        PlayerCharacter newPC = new PlayerCharacter(position, 10, 30, 100, 100, clock, "", weapon);
+        PlayerCharacter newPC = gameObjectFactory.createPCCommon(name, position, position, weapon);
         add(newPC);
         return newPC;
     }
@@ -94,6 +98,8 @@ public class GameServer {
         return dynamicObjects.containsKey(id) || staticObjects.containsKey(id);
     }
 
+    //Getter & Setters
+
     public Jsonb getJsonb() {
         return jsonb;
     }
@@ -108,5 +114,29 @@ public class GameServer {
 
     public void setLevelArea(Rectangle levelArea) {
         this.levelArea = levelArea;
+    }
+
+    public GameObjectFactory getGameObjectFactory() {
+        return gameObjectFactory;
+    }
+
+    public void setGameObjectFactory(GameObjectFactory gameObjectFactory) {
+        this.gameObjectFactory = gameObjectFactory;
+    }
+
+    Map<Integer, DynamicObject> getDynamicObjects() {
+        return dynamicObjects;
+    }
+
+    void setDynamicObjects(Map<Integer, DynamicObject> dynamicObjects) {
+        this.dynamicObjects = dynamicObjects;
+    }
+
+    Map<Integer, StaticObject> getStaticObjects() {
+        return staticObjects;
+    }
+
+    void setStaticObjects(Map<Integer, StaticObject> staticObjects) {
+        this.staticObjects = staticObjects;
     }
 }

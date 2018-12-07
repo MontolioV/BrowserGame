@@ -1,4 +1,4 @@
-package com.myapp;
+package com.myapp.core;
 
 import javax.enterprise.inject.Produces;
 import javax.json.bind.Jsonb;
