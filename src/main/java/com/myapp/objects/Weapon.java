@@ -33,8 +33,8 @@ public class Weapon {
 
         double xSign = xModifier < 0.1 && xModifier > -0.1 ? 0 : Math.signum(xModifier);
         double ySign = yModifier < 0.1 && yModifier > -0.1 ? 0 : Math.signum(yModifier);
-        int x0 = (int) ((owner.getHitRadius() + 6) * xSign);
-        int y0 = (int) ((owner.getHitRadius() + 6) * ySign);
+        int x0 = (int) ((owner.getHitRadius() + 10) * xSign);
+        int y0 = (int) ((owner.getHitRadius() + 10) * ySign);
         x0 += owner.getCurrentPosition().getX();
         y0 += owner.getCurrentPosition().getY();
 

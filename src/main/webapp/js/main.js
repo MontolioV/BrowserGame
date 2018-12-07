@@ -4,7 +4,8 @@
     const SOCKET = new WebSocket("ws://localhost:8080/BrowserGame/game-socket");
     const ACTION_CANVAS = document.getElementById('actionLayer');
     const ACTION_CONTEXT = ACTION_CANVAS.getContext('2d');
-    const CHARACTER_CANVAS = drawCharacter();
+    const PROJECTILE_CANVAS = drawProjectile();
+    const PC_CANVAS = drawPC();
     let selfId;
     let selfObject;
     let gameObjects = [];
@@ -34,7 +35,7 @@
             if (!selfObject) {
                 selfObject = gameObjects.find(value => value.id === selfId);
             }
-            console.log(JSON.stringify(gameObjects));
+            // console.log(JSON.stringify(gameObjects));
         }
     };
 
@@ -51,12 +52,21 @@
     };
     document.onkeypress = function (ev) {
         switch (ev.key) {
+            case 'а':
             case 'f':
-                SOCKET.send(JSON.stringify(new ClientRequest({type: 'FIRE'})));
-                console.log(JSON.stringify(new ClientRequest({type: 'FIRE'})));
+                sendFireRequest();
                 break;
         }
     };
+    document.getElementById('fire-btn').onclick = function (ev) {
+        sendFireRequest();
+    };
+
+    function sendFireRequest() {
+        if (gameObjects.find(value => value.id === selfId)) {
+            SOCKET.send(JSON.stringify(new ClientRequest({type: 'FIRE'})));
+        }
+    }
 
     window.requestAnimationFrame(renderActionLayer);
 
@@ -73,7 +83,14 @@
             ACTION_CONTEXT.save();
             ACTION_CONTEXT.translate(obj.currentPosition.x, obj.currentPosition.y);
             ACTION_CONTEXT.rotate(obj.rotationAngleRadians);
-            ACTION_CONTEXT.drawImage(CHARACTER_CANVAS, -10, -10);
+            switch (obj.className) {
+                case 'PlayerCharacter':
+                    ACTION_CONTEXT.drawImage(PC_CANVAS, -10, -10);
+                    break;
+                case 'Projectile':
+                    ACTION_CONTEXT.drawImage(PROJECTILE_CANVAS, -5, -5);
+                    break;
+            }
             ACTION_CONTEXT.restore();
         }
 
@@ -81,7 +98,7 @@
     }
 
 
-    function drawCharacter() {
+    function drawPC() {
         let result = document.createElement('canvas');
         result.width = 20;
         result.height = 20;
@@ -96,6 +113,18 @@
         context.strokeStyle = 'black';
         context.fillStyle = 'green';
         context.stroke();
+        context.fill();
+        return result;
+    }
+
+    function drawProjectile() {
+        let result = document.createElement('canvas');
+        result.width = 10;
+        result.height = 10;
+        let context = result.getContext('2d');
+        context.beginPath();
+        context.arc(5, 5, 5, 0, 2 * Math.PI);
+        context.fillStyle = 'blue';
         context.fill();
         return result;
     }

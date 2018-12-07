@@ -1,4 +1,33 @@
+body * {
+    margin: 0;
+    box-sizing: border-box;
+}
 
 #actionLayer {
     border: 1px solid black;
+}
+
+#fire-btn {
+    width: 500px;
+    height: 100px;
+    padding: 33px 0;
+    background: linear-gradient(white, #ffff00 5%, #ffcd05 20%, #7d5b00);
+    color: #480b0a;
+    text-align: center;
+    font-size: 33px;
+    cursor: pointer;
+}
+
+#fire-btn:active {
+    background: linear-gradient(#e3e3e3, #e8e800 5%, #e2b805 20%, #634800);
+    color: #a51a18;
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

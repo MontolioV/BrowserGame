@@ -1,7 +1,7 @@
 'use strict';
 
 class GameObject {
-    constructor({id, currentPosition, destination, speed}) {
+    constructor({id, currentPosition, destination, speed, className}) {
         this.id = id;
         this.currentPosition = new Position(currentPosition);
         this.destination = new Position(destination);
@@ -10,6 +10,7 @@ class GameObject {
         this.maxPossibleDistance = speed / 1000 * 16;
         this.rotationAngleRadians = 0;
         this.calculateRotation();
+        this.className = className;
     }
 
     update({currentPosition, destination}) {

@@ -42,10 +42,10 @@ public class WeaponTest {
     private ArgumentCaptor<Position> destinationPositionCaptor;
     private int projectileHitRadius = 5;
     private int pcHitRadius = 1;
-    private int safeDistMod = projectileHitRadius + pcHitRadius + 1;
+    private int safeDistMod = projectileHitRadius + pcHitRadius + 5;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(pcMock.getClock()).thenReturn(clockMock);
         when(pcMock.getCurrentPosition()).thenReturn(positionMock);
         when(pcMock.getSpeed()).thenReturn(10D);

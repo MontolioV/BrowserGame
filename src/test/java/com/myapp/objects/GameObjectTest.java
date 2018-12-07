@@ -25,7 +25,7 @@ public class GameObjectTest {
     private int radius = 250;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         gameObject1.setHitDamage(10);
         gameObject1.setHp(100);
         gameObject1.setHitRadius(radius);
@@ -41,9 +41,10 @@ public class GameObjectTest {
 
     @Test
     public void idAutoAssignment() {
-        int currentID = gameObject2.getId();
-        assertThat(new GameObjectTestImpl().getId(), is(currentID + 1));
-        assertThat(new GameObjectTestImpl().getId(), is(currentID + 2));
+        int id = new GameObjectTestImpl().getId();
+        assertThat(gameObject1.getId(), is(id - 2));
+        assertThat(gameObject2.getId(), is(id - 1));
+        assertThat(new GameObjectTestImpl().getId(), is(id + 1));
     }
 
     @Test

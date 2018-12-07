@@ -15,6 +15,7 @@ public abstract class GameObject {
     private int hitRadius;
     private int hitDamage;
     private int hp;
+    private String className = this.getClass().getSimpleName();
 
     public GameObject() {
         this.id = objectCounter.getAndIncrement();
@@ -86,4 +87,11 @@ public abstract class GameObject {
         this.hp = hp;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
 }
