@@ -12,7 +12,7 @@ public class Projectile extends DynamicObject {
     public Projectile() {
     }
 
-    public Projectile(Position position, int hitRadius, int hitDamage, int hp, int speed, Clock clock) {
-        super(position, hitRadius, hitDamage, hp, speed, clock);
+    public Projectile(Position current, Position destination, int hitRadius, int hitDamage, int hp, double speed, Clock clock) {
+        super(current, destination, hitRadius, hitDamage, hp, speed, clock);
     }
 }

@@ -15,7 +15,7 @@ public class PlayerCharacter extends DynamicObject {
     public PlayerCharacter() {
     }
 
-    public PlayerCharacter(Position position, int hitRadius, int hitDamage, int hp, int speed, Clock clock, String playerName, Weapon weapon) {
+    public PlayerCharacter(Position position, int hitRadius, int hitDamage, int hp, double speed, Clock clock, String playerName, Weapon weapon) {
         super(position, hitRadius, hitDamage, hp, speed, clock);
         this.playerName = playerName;
         this.weapon = weapon;

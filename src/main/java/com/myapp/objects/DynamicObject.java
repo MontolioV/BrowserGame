@@ -20,9 +20,16 @@ public class DynamicObject extends GameObject {
     public DynamicObject() {
     }
 
-    public DynamicObject(Position position, int hitRadius, int hitDamage, int hp, int speed, Clock clock) {
-        super(position, hitRadius, hitDamage, hp);
-        destination = position;
+    public DynamicObject(Position positionNoMovement, int hitRadius, int hitDamage, int hp, double speed, Clock clock) {
+        super(positionNoMovement, hitRadius, hitDamage, hp);
+        destination = positionNoMovement;
+        this.speed = speed;
+        this.clock = clock;
+    }
+
+    public DynamicObject(Position current, Position destination, int hitRadius, int hitDamage, int hp, double speed, Clock clock) {
+        super(current, hitRadius, hitDamage, hp);
+        this.destination = destination;
         this.speed = speed;
         this.clock = clock;
     }
@@ -58,7 +65,7 @@ public class DynamicObject extends GameObject {
         if (currentPosition.distance(destination) > 0) {
             int xDestinationFromZero = destination.getX() - currentPosition.getX();
             int yDestinationFromZero = destination.getY() - currentPosition.getY();
-            directionAngle = Math.toDegrees(Math.atan2(yDestinationFromZero, xDestinationFromZero));
+            directionAngle = Math.atan2(yDestinationFromZero, xDestinationFromZero);
         }
     }
 

@@ -155,25 +155,25 @@ public class DynamicObjectTest {
         when(destinationMock.getY()).thenReturn(0);
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(180D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(180)));
 
         when(destinationMock.getX()).thenReturn(0);
         when(destinationMock.getY()).thenReturn(1);
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(90D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(90)));
 
         when(destinationMock.getX()).thenReturn(1);
         when(destinationMock.getY()).thenReturn(0);
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(0D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(0)));
 
         when(destinationMock.getX()).thenReturn(0);
         when(destinationMock.getY()).thenReturn(-1);
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(-90D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(-90)));
 
         when(positionMock.getX()).thenReturn(1);
         when(positionMock.getY()).thenReturn(1);
@@ -181,7 +181,7 @@ public class DynamicObjectTest {
         when(destinationMock.getY()).thenReturn(0);
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(-90D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(-90)));
 
         when(positionMock.getX()).thenReturn(-1);
         when(positionMock.getY()).thenReturn(-1);
@@ -189,11 +189,11 @@ public class DynamicObjectTest {
         when(destinationMock.getY()).thenReturn(1);
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(45D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(45)));
 
-        when(positionMock.distance(destinationMock)).thenReturn(0D);
+        when(positionMock.distance(destinationMock)).thenReturn(Math.toRadians(0));
 
         dynamicObject.updateDirectionAngle();
-        assertThat(dynamicObject.getDirectionAngle(), is(45D));
+        assertThat(dynamicObject.getDirectionAngle(), is(Math.toRadians(45)));
     }
 }
